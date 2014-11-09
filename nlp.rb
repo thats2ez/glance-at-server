@@ -7,7 +7,6 @@ class NaturalLanguageParser
     ['let me know', 'Let me know', 'send me', 'Send me']
 
   def initialize(message)
-    @name = 'nlp'
     @message = message
   end
 

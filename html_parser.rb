@@ -8,16 +8,25 @@ class HTMLParser
   end
 
   def remove_quote
+    # deep copy
+    @no_quote = Marshal.load(Marshal.dump(@doc))
     # delete blockquote nodes
-    @doc.css('blockquote').remove
+    @no_quote.css('blockquote').remove
 
     # delete node with certain classes
-    @doc.css('.gmail_quote').remove
-    @doc.css('.gmail_extra').remove
-    @doc.css('.moz-signature').remove
+    @no_quote.css('.gmail_quote').remove
+    @no_quote.css('.gmail_extra').remove
+    @no_quote.css('.moz-signature').remove
 
     # return the remaining html
-    @doc.inner_html
+    @no_quote.inner_html
+  end
+
+  def highlight_request(request)
+    # deep copy
+    @highlighted = Marshal.load(Marshal.dump(@doc))
+
+    @highlighted.inner_html
   end
 
 end
