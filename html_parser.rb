@@ -3,30 +3,38 @@ require 'nokogiri'
 class HTMLParser
 
   def initialize(body)
-    @doc = Nokogiri::HTML(body)
+    @body = body
     # p @doc
   end
 
   def remove_quote
     # deep copy
-    @no_quote = Marshal.load(Marshal.dump(@doc))
+    doc = Nokogiri::HTML(@body)
     # delete blockquote nodes
-    @no_quote.css('blockquote').remove
+    doc.css('blockquote').remove
 
     # delete node with certain classes
-    @no_quote.css('.gmail_quote').remove
-    @no_quote.css('.gmail_extra').remove
-    @no_quote.css('.moz-signature').remove
+    doc.css('.gmail_quote').remove
+    doc.css('.gmail_extra').remove
+    doc.css('.moz-signature').remove
 
-    # return the remaining html
-    @no_quote.inner_html
+    # the remaining html
+    @no_quote = doc.inner_html
+
+    # regex to match Microsoft Office quote
+    reg = Regexp.new('<p class="MsoNormal"><b>.*From:.*(?=<\/div>\\s*<\/body>)', Regexp::MULTILINE)
+    @no_quote.sub!(reg, '')
+
+    # regex to match plain text quote by gmail
+    reg = Regexp.new('<br/>On (Mon|Tue|Wed|Thu|Fri|Sat|Sun),[^\\r\\n]*&lt;[^\\r\\n\\s]*@[^\\r\\n\\s]*&gt; wrote:.*', Regexp::MULTILINE)
+    @no_quote.sub!(reg, '')
   end
 
   def highlight_request(request)
     # deep copy
-    @highlighted = Marshal.load(Marshal.dump(@doc))
+    doc = Nokogiri::HTML(@body)
 
-    @highlighted.inner_html
+    @highlighted = doc.inner_html
   end
 
 end
