@@ -1,4 +1,5 @@
 require 'treat'
+require 'chronic'
 include Treat::Core::DSL
 
 class NaturalLanguageParser
@@ -11,10 +12,32 @@ class NaturalLanguageParser
   end
 
   def requests
-    self.class.sentences(@message).select { |s| self.class.request? s }
+    parse_requests unless @requests
+    @requests
+  end
+
+  def request_with_date(now = nil)
+    # parse if not yet parsed
+    parse_dates(now) unless @dates
+    # get the first request with non-nil date
+    @requests.each_with_index do |item, index|
+      return { request: item, date: @dates[index] } if @dates[index]
+    end
+    nil
   end
 
   private
+
+  def parse_requests
+    @requests = self.class.sentences(@message).select { |s| self.class.request? s }
+  end
+
+  def parse_dates(now = nil)
+    # parse if not yet parsed
+    parse_requests unless @requests
+    # get date for every request
+    @dates = @requests.map { |request| self.class.date_in_request(request, now) }
+  end
 
   def self.sentences(text)
     paragraph(text).segment(:srx).to_a
@@ -31,4 +54,10 @@ class NaturalLanguageParser
       @@request_keywords.any? { |w| text.include? w }
     end
   end
+
+  def self.date_in_request(text, now)
+    Chronic.parse(text, :now => now)
+  end
+
+
 end
