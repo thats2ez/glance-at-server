@@ -66,3 +66,7 @@ p n.requests
 n2 = NaturalLanguageParser.new('hahahahahahaha?')
 p n2.request_with_date
 p n2.requests
+
+n2 = NaturalLanguageParser.new('')
+p n2.request_with_date
+p n2.requests
